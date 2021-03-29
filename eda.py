@@ -2,10 +2,13 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from os import getenv
+from os.path import abspath, join
 
 #%%
+data_dir = getenv("SM_CHANNEL_TRAINING", "/opt/ml/input/data/training")
 df = pd.read_csv(
-    "/media/mlisovyi/shared_space/kaggle/unearthed/total-recore1/data/public/public.csv.gz",
+    join(data_dir, "public.csv.gz"),
     index_col=0,
 )
 # %%
