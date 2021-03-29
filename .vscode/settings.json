@@ -4,4 +4,8 @@
         "SM_MODEL_DIR": "${workspaceFolder}/model",
         "SM_CHANNEL_TRAINING": "${workspaceFolder}/data/public"
     },
+    "terminal.integrated.env.windows": {
+        "SM_MODEL_DIR": "${workspaceFolder}\\model",
+        "SM_CHANNEL_TRAINING": "${workspaceFolder}\\data\\public"
+    },
 }
