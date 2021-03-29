@@ -1,4 +1,4 @@
-model/
+model
 #competition data
 data/public/public.csv.gz
 
