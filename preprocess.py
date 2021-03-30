@@ -88,11 +88,13 @@ def preprocess(data_file):
     cols_id = ["DepthTo", "SiteID", "DepthFrom"]
     df_sp = df_x.drop(columns=cols_id, axis=1)
 
-    v_max = df_sp.iloc[:, 100:-300].max(axis=1)
-    v_min = df_sp.iloc[:, 100:-300].min(axis=1)
+    i_min = 100
+    i_max = -300
+    v_max = df_sp.iloc[:, i_min:i_max].max(axis=1)
+    v_min = df_sp.iloc[:, i_min:i_max].min(axis=1)
     df_sp = df_sp.clip(v_min, v_max, axis=0).div(v_max, axis=0)
 
-    n = 3
+    n = 10
     df_sp = df_sp.rolling(n, axis=1, min_periods=1).sum().loc[:, ::n]
 
     df_x = pd.concat([df_x[cols_id], df_sp], axis=1)
