@@ -88,13 +88,13 @@ def preprocess(data_file):
     cols_id = ["DepthTo", "SiteID", "DepthFrom"]
     df_sp = df_x.drop(columns=cols_id, axis=1)
 
-    i_min = 100
+    i_min = 0
     i_max = -300
     v_max = df_sp.iloc[:, i_min:i_max].max(axis=1)
     v_min = df_sp.iloc[:, i_min:i_max].min(axis=1)
     df_sp = df_sp.clip(v_min, v_max, axis=0).div(v_max, axis=0)
 
-    n = 5
+    n = 7
     df_sp = df_sp.rolling(n, axis=1, min_periods=1).sum().loc[:, ::n]
 
     # df_diff = df_sp.diff(axis=1).dropna(axis=1).rename(lambda s: f"diff_{s}", axis=1)
