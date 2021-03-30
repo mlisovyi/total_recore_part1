@@ -6,8 +6,11 @@ from os.path import join
 
 import pandas as pd
 
-from preprocess import preprocess
+from preprocess import preprocess, target_columns
 from train import model_fn
+
+# needed to load the model from pickle
+from train import CustomRidgeCV
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -43,59 +46,6 @@ if __name__ == "__main__":
     model = model_fn(args.model_dir)
 
     logger.info("creating predictions")
-
-    # Pass the feature columns to predict the target values
-    target_columns = [
-        "AgPPM",
-        "AsPPM",
-        "AuPPM",
-        "BaPPM",
-        "BiPPM",
-        "CdPPM",
-        "CoPPM",
-        "CuPPM",
-        "FePCT",
-        "MnPPM",
-        "MoPPM",
-        "NiPPM",
-        "PPCT",
-        "PbPPM",
-        "SPPM",
-        "SbPPM",
-        "SePPM",
-        "SnPPM",
-        "SrPPM",
-        "TePPB",
-        "ThPPB",
-        "UPPB",
-        "VPCT",
-        "WPPM",
-        "ZnPPM",
-        "ZrPPM",
-        "BePPM",
-        "AlPPM",
-        "CaPPM",
-        "CePPM",
-        "CrPPM",
-        "CsPPM",
-        "GaPPM",
-        "GePPM",
-        "HfPPM",
-        "InPPM",
-        "KPPM",
-        "LaPPM",
-        "LiPPM",
-        "MgPPM",
-        "NaPPM",
-        "NbPPM",
-        "RbPPM",
-        "RePPM",
-        "ScPPM",
-        "TaPPM",
-        "TiPPM",
-        "TlPPM",
-        "YPPM",
-    ]
 
     inputs = df.drop(columns=target_columns)
 
