@@ -94,8 +94,10 @@ def preprocess(data_file):
     v_min = df_sp.iloc[:, i_min:i_max].min(axis=1)
     df_sp = df_sp.clip(v_min, v_max, axis=0).div(v_max, axis=0)
 
-    n = 10
+    n = 5
     df_sp = df_sp.rolling(n, axis=1, min_periods=1).sum().loc[:, ::n]
+
+    # df_diff = df_sp.diff(axis=1).dropna(axis=1).rename(lambda s: f"diff_{s}", axis=1)
 
     df_x = pd.concat([df_x[cols_id], df_sp], axis=1)
     # rejoin the columns
