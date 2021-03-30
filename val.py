@@ -11,22 +11,19 @@ import numpy as np
 import pandas as pd
 import sklearn
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.linear_model import (
-    Lasso,
     LassoCV,
-    MultiTaskElasticNetCV,
-    MultiTaskLassoCV,
-    Ridge,
     RidgeCV,
 )
 from sklearn.metrics import make_scorer, r2_score
-from sklearn.model_selection import train_test_split, KFold, StratifiedKFold
+from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.compose import TransformedTargetRegressor
 
 from preprocess import preprocess, target_columns
 from score import scoring_fn
-from train import CustomRidgeCV, save_model, model_fn, input_fn
+from train import CustomRidgeCV
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -44,16 +41,14 @@ def train_evaluate_model(X_trn, X_tst, y_trn, y_tst, verbose=True):
 
     # the example model
     # model = RidgeCV(alphas=(1e-2, 1e-1, 1, 1e1, 1e2), scoring=make_scorer(r2_score))
-    # model = MultiTaskLassoCV()
     model = CustomRidgeCV(
         alphas=np.logspace(-5, 5, 50),
         scoring=make_scorer(r2_score),
         alpha_per_target=True,
     )
-    # model = Pipeline([("scaler", MinMaxScaler()), ("model", model)])
-    # model = RandomForestRegressor(n_estimators=30, max_depth=10, random_state=42)
+    model = TransformedTargetRegressor(model, func=np.log1p, inverse_func=np.expm1)
 
-    model.fit(X_trn, y_trn)
+    model.fit(X_trn, y_trn.clip(lower=0))
 
     preds_trn = pd.DataFrame(model.predict(X_trn), columns=target_columns)
     preds_tst = pd.DataFrame(model.predict(X_tst), columns=target_columns)
@@ -112,9 +107,6 @@ def train(args):
         print(f"Performance in CV: {np.mean(scores):.3f} +- {np.std(scores):.3f}")
         y_oof = pd.DataFrame(y_oof, index=y_train.index, columns=y_train.columns)
         y_oof.to_csv(join(args.data_dir, "oof.csv"))
-
-    # save the model to disk)  #
-    # save_model(model, args.model_dir)
 
 
 if __name__ == "__main__":
