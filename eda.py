@@ -4,11 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from os import getenv
 from os.path import abspath, join
+from predict import preprocess
 
 #%%
 data_dir = getenv("SM_CHANNEL_TRAINING", "/opt/ml/input/data/training")
+data_file = join(data_dir, "public.csv.gz")
+df_pp = preprocess(data_file)
 df = pd.read_csv(
-    join(data_dir, "public.csv.gz"),
+    data_file,
     index_col=0,
 )
 # %%
@@ -26,22 +29,18 @@ plt.show()
 # %%
 # Some spectra
 n = 10
-df_ = df.sort_values(by="CuPPM").tail(n)
+df_ = df_pp.sort_values(by="CuPPM").tail(n)
 for i in range(n):
-    v_max = df_.iloc[i, 100:-250].max()
-    v_min = df_.iloc[i, 100:-250].min()
-    (df_.iloc[i, 3:-49].clip(v_min, v_max) / v_max).plot(label=str(i))
+    df_.iloc[i, 3:-49].plot(label=str(i))
     plt.legend()
 plt.title("Top CuPPM")
 plt.show()
 
 # %%
 n = 5
-df_ = df.sort_values(by="CuPPM").head(n)
+df_ = df_pp.sort_values(by="CuPPM").head(n)
 for i in range(n):
-    v_max = df_.iloc[i, 100:-250].max()
-    v_min = df_.iloc[i, 100:-250].min()
-    (df_.iloc[i, 3:-49].clip(v_min, v_max) / v_max).plot(label=str(i))
+    df_.iloc[i, 3:-49].plot(label=str(i))
     plt.legend()
 plt.title("Bottom CuPPM")
 plt.show()
