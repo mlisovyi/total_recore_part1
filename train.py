@@ -13,7 +13,7 @@ import sklearn
 from sklearn.metrics import make_scorer, r2_score
 from sklearn.linear_model import Ridge, RidgeCV
 
-from preprocess import preprocess
+from preprocess import preprocess, target_columns
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -23,6 +23,13 @@ logging.basicConfig(level=logging.INFO)
 # WARNING - removing this may cause the submission process to fail
 if abspath("/opt/ml/code") not in sys.path:
     sys.path.append(abspath("/opt/ml/code"))
+
+
+class CustomRidgeCV(RidgeCV):
+    def predict(self, X):
+        y_preds = super().predict(X)
+        y_preds = np.clip(y_preds, 0, None)
+        return y_preds
 
 
 def train(args):
@@ -38,59 +45,6 @@ def train(args):
     # apply it to the private data
     df = preprocess(join(args.data_dir, "public.csv.gz"))
 
-    # the list of 49 elements which are target variables for this challenge
-    target_columns = [
-        "AgPPM",
-        "AsPPM",
-        "AuPPM",
-        "BaPPM",
-        "BiPPM",
-        "CdPPM",
-        "CoPPM",
-        "CuPPM",
-        "FePCT",
-        "MnPPM",
-        "MoPPM",
-        "NiPPM",
-        "PPCT",
-        "PbPPM",
-        "SPPM",
-        "SbPPM",
-        "SePPM",
-        "SnPPM",
-        "SrPPM",
-        "TePPB",
-        "ThPPB",
-        "UPPB",
-        "VPCT",
-        "WPPM",
-        "ZnPPM",
-        "ZrPPM",
-        "BePPM",
-        "AlPPM",
-        "CaPPM",
-        "CePPM",
-        "CrPPM",
-        "CsPPM",
-        "GaPPM",
-        "GePPM",
-        "HfPPM",
-        "InPPM",
-        "KPPM",
-        "LaPPM",
-        "LiPPM",
-        "MgPPM",
-        "NaPPM",
-        "NbPPM",
-        "RbPPM",
-        "RePPM",
-        "ScPPM",
-        "TaPPM",
-        "TiPPM",
-        "TlPPM",
-        "YPPM",
-    ]
-
     y_train = df[target_columns]
     logger.info(f"training target shape is {y_train.shape}")
     X_train = df.drop(columns=target_columns)
@@ -98,7 +52,7 @@ def train(args):
 
     # the example model
     # model = Ridge()
-    model = RidgeCV(
+    model = CustomRidgeCV(
         alphas=np.logspace(-5, 5, 50),
         scoring=make_scorer(r2_score),
         alpha_per_target=True,
