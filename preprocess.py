@@ -67,7 +67,7 @@ target_columns = [
 
 def preprocess(data_file):
     """Apply preprocessing and featurization steps to each file in the data directory.
-    
+
     Your preprocessing and feature generation goes here.
     """
     logger.info(f"running preprocess on {data_file}")
@@ -88,12 +88,14 @@ def preprocess(data_file):
     cols_id = ["DepthTo", "SiteID", "DepthFrom"]
     df_sp = df_x.drop(columns=cols_id, axis=1)
 
-    # n = 10
-    # df_sp = df_sp.rolling(n, axis=1, min_periods=1).sum().loc[:, ::n]
+    i_min = 100
+    i_max = -300
+    v_max = df_sp.iloc[:, i_min:i_max].max(axis=1)
+    v_min = df_sp.iloc[:, i_min:i_max].min(axis=1)
+    df_sp = df_sp.clip(v_min, v_max, axis=0).div(v_max, axis=0)
 
-    v_max = df_sp.iloc[:, 100:-200].max()
-    v_min = df_sp.iloc[:, 100:-200].min()
-    df_sp = df_sp.clip(v_min, v_max, axis=0)
+    n = 10
+    df_sp = df_sp.rolling(n, axis=1, min_periods=1).sum().loc[:, ::n]
 
     df_x = pd.concat([df_x[cols_id], df_sp], axis=1)
     # rejoin the columns
@@ -111,7 +113,7 @@ if __name__ == "__main__":
 
     The main function is called by both Unearthed's SageMaker pipeline and the
     Unearthed CLI's "unearthed preprocess" command.
-    
+
     WARNING - modifying this file may cause the submission process to fail.
     """
     parser = argparse.ArgumentParser()
@@ -128,4 +130,3 @@ if __name__ == "__main__":
 
     # write to the output location
     df.to_csv(args.output)
-
