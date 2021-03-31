@@ -10,11 +10,12 @@ from os.path import abspath, join
 import numpy as np
 import pandas as pd
 import sklearn
+from joblib import dump, load
 from sklearn.compose import TransformedTargetRegressor
 from sklearn.metrics import make_scorer, r2_score
 
 from preprocess import preprocess, target_columns
-from mdl import CustomRidgeCV
+from mdl import CustomRidgeCV, RidgeCV, EnsembleModel
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -50,12 +51,6 @@ def train(args):
         scoring=make_scorer(r2_score),
         alpha_per_target=True,
     )
-    # model = TransformedTargetRegressor(
-    #     model,
-    #     func=lambda x: x,
-    #     inverse_func=lambda x: x.clip(0),
-    #     check_inverse=False,
-    # )
     model.fit(X_train, y_train)
 
     # save the model to disk
@@ -71,8 +66,9 @@ def save_model(model, model_dir):
     WARNING - modifying this function may cause the submission process to fail.
     """
     logger.info(f"saving model to {model_dir}")
-    with open(join(model_dir, "model.pkl"), "wb") as model_file:
-        pickle.dump(model, model_file)
+    # with open(join(model_dir, "model.pkl"), "wb") as model_file:
+    #     pickle.dump(model, model_file)
+    dump(model, join(model_dir, "model.joblib"))
 
 
 def model_fn(model_dir):
@@ -83,8 +79,9 @@ def model_fn(model_dir):
     WARNING - modifying this function may case the submission process to fail.
     """
     logger.info("loading model")
-    with open(join(model_dir, "model.pkl"), "rb") as file:
-        return pickle.load(file)
+    # with open(join(model_dir, "model.pkl"), "rb") as file:
+    #     return pickle.load(file)
+    return load(join(model_dir, "model.joblib"))
 
 
 def input_fn(input_data, content_type):

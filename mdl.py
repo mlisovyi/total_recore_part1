@@ -59,3 +59,14 @@ class CustomRidgeCV(RidgeCV):
         y_preds = super().predict(X)
         y_preds = np.clip(y_preds, self._v_min, None)
         return y_preds
+
+
+class EnsembleModel:
+    def __init__(self, models):
+        self.models = models
+
+    def predict(self, inputs):
+        # Do something here with self.models to calculate your predictions.
+        # then return them.
+        return self.models.predict(inputs)
+
