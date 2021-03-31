@@ -13,6 +13,7 @@ import sklearn
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import (
     LassoCV,
+    MultiTaskLassoCV,
     RidgeCV,
 )
 from sklearn.metrics import make_scorer, r2_score
@@ -23,7 +24,7 @@ from sklearn.compose import TransformedTargetRegressor
 
 from preprocess import preprocess, target_columns
 from score import scoring_fn
-from train import CustomRidgeCV
+from mdl import CustomRidgeCV
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -36,19 +37,23 @@ if abspath("/opt/ml/code") not in sys.path:
 
 
 def train_evaluate_model(X_trn, X_tst, y_trn, y_tst, verbose=True):
-    # if verbose:
-    print(f"TRN: {len(X_trn)}, TST: {len(X_tst)}")
+    if verbose:
+        print(f"TRN: {len(X_trn)}, TST: {len(X_tst)}")
 
     # the example model
-    # model = RidgeCV(alphas=(1e-2, 1e-1, 1, 1e1, 1e2), scoring=make_scorer(r2_score))
-    model = CustomRidgeCV(
+    model = RidgeCV(
         alphas=np.logspace(-5, 5, 50),
         scoring=make_scorer(r2_score),
         alpha_per_target=True,
     )
-    model = TransformedTargetRegressor(model, func=np.log1p, inverse_func=np.expm1)
+    # model = TransformedTargetRegressor(
+    #     model,
+    #     func=lambda x: x,
+    #     inverse_func=lambda x: x.clip(0),
+    #     check_inverse=False,
+    # )
 
-    model.fit(X_trn, y_trn.clip(lower=0))
+    model.fit(X_trn, y_trn)
 
     preds_trn = pd.DataFrame(model.predict(X_trn), columns=target_columns)
     preds_tst = pd.DataFrame(model.predict(X_tst), columns=target_columns)
@@ -89,24 +94,35 @@ def train(args):
         )
         _ = train_evaluate_model(X_trn, X_tst, y_trn, y_tst)
     else:
-        scores = []
-        y_oof = np.zeros_like(y_train.values)
-        cv = KFold(n_splits=4, random_state=42, shuffle=True)
-        for i, (idx_trn, idx_tst) in enumerate(cv.split(X_train, y_train)):
-            logger.info(f"------ {i} -------------")
-            X_trn, y_trn = X_train.iloc[idx_trn, :], y_train.iloc[idx_trn]
-            X_tst, y_tst = X_train.iloc[idx_tst, :], y_train.iloc[idx_tst]
-            # allow usage a subsampling to check dependence of performace on data sample
-            n = int(len(y_trn) * 1)
-            _, _, score_tst, preds_tst = train_evaluate_model(
-                X_trn.head(n), X_tst, y_trn.head(n), y_tst, verbose=True
-            )
-            scores.append(score_tst)
-            y_oof[idx_tst, :] = preds_tst.values
+        scores_oof = []
+        for j in range(5):
+            logger.info(f"====== {j} =============")
+            scores = []
+            y_oof = np.zeros_like(y_train.values)
+            cv = KFold(n_splits=4, random_state=j, shuffle=True)
+            for i, (idx_trn, idx_tst) in enumerate(cv.split(X_train, y_train)):
+                logger.info(f"------ {i} -------------")
+                X_trn, y_trn = X_train.iloc[idx_trn, :], y_train.iloc[idx_trn]
+                X_tst, y_tst = X_train.iloc[idx_tst, :], y_train.iloc[idx_tst]
+                # allow usage a subsampling to check dependence of performace on data sample
+                n = int(len(y_trn) * 1)
+                _, _, score_tst, preds_tst = train_evaluate_model(
+                    X_trn.head(n), X_tst, y_trn.head(n), y_tst, verbose=False
+                )
+                scores.append(score_tst)
+                y_oof[idx_tst, :] = preds_tst.values
 
-        print(f"Performance in CV: {np.mean(scores):.3f} +- {np.std(scores):.3f}")
-        y_oof = pd.DataFrame(y_oof, index=y_train.index, columns=y_train.columns)
-        y_oof.to_csv(join(args.data_dir, "oof.csv"))
+            print(f"Individual values: {[f'{s:.3f}' for s in scores]}")
+            print(f"Performance in CV: {np.mean(scores):.3f} +- {np.std(scores):.3f}")
+            y_oof = pd.DataFrame(y_oof, index=y_train.index, columns=y_train.columns)
+            y_oof.to_csv(join(args.data_dir, "oof.csv"))
+
+            score_oof = scoring_fn(y_train, y_oof)
+            print(f"OOF score = {score_oof:.3f}")
+            scores_oof.append(score_oof)
+        print(
+            f"Performance in CV: {np.mean(scores_oof):.3f} +- {np.std(score_oof):.3f}"
+        )
 
 
 if __name__ == "__main__":
@@ -129,6 +145,8 @@ if __name__ == "__main__":
         default=getenv("SM_CHANNEL_TRAINING", "/opt/ml/input/data/training"),
     )
     parser.add_argument(
-        "--cv", default=False, action="store_true",
+        "--cv",
+        default=False,
+        action="store_true",
     )
     train(parser.parse_args())

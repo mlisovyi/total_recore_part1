@@ -10,10 +10,11 @@ from os.path import abspath, join
 import numpy as np
 import pandas as pd
 import sklearn
+from sklearn.compose import TransformedTargetRegressor
 from sklearn.metrics import make_scorer, r2_score
-from sklearn.linear_model import Ridge, RidgeCV
 
 from preprocess import preprocess, target_columns
+from mdl import CustomRidgeCV
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -23,65 +24,6 @@ logging.basicConfig(level=logging.INFO)
 # WARNING - removing this may cause the submission process to fail
 if abspath("/opt/ml/code") not in sys.path:
     sys.path.append(abspath("/opt/ml/code"))
-
-
-class CustomRidgeCV(RidgeCV):
-    _v_min = [
-        -0.0,
-        -0.0,
-        -0.0,
-        30.0,
-        -0.0,
-        -0.0,
-        2.0,
-        3.0,
-        1.0,
-        76.0,
-        0.0,
-        3.0,
-        0.0,
-        -0.0,
-        100.0,
-        -0.0,
-        -1.0,
-        0.0,
-        6.0,
-        -50.0,
-        90.0,
-        -100.0,
-        0.0,
-        0.0,
-        -2.0,
-        1.0,
-        -0.0,
-        3100.0,
-        500.0,
-        1.0,
-        5.0,
-        0.0,
-        2.0,
-        -0.0,
-        0.0,
-        -0.0,
-        1000.0,
-        1.0,
-        1.0,
-        1100.0,
-        400.0,
-        0.0,
-        3.0,
-        -0.0,
-        1.0,
-        -0.0,
-        110.0,
-        0.0,
-        1.0,
-    ]
-
-    def predict(self, X):
-        y_preds = super().predict(X)
-        y_preds = np.clip(y_preds, self._v_min, None)
-        return y_preds
 
 
 def train(args):
@@ -103,12 +45,17 @@ def train(args):
     logger.info(f"training input shape is {X_train.shape}")
 
     # the example model
-    # model = Ridge()
     model = CustomRidgeCV(
         alphas=np.logspace(-5, 5, 50),
         scoring=make_scorer(r2_score),
         alpha_per_target=True,
     )
+    # model = TransformedTargetRegressor(
+    #     model,
+    #     func=lambda x: x,
+    #     inverse_func=lambda x: x.clip(0),
+    #     check_inverse=False,
+    # )
     model.fit(X_train, y_train)
 
     # save the model to disk
@@ -156,7 +103,7 @@ if __name__ == "__main__":
 
     The main function is called by both Unearthed's SageMaker pipeline and the
     Unearthed CLI's "unearthed train" command.
-    
+
     WARNING - modifying this function may cause the submission process to fail.
 
     The main function must call preprocess, arrange th
