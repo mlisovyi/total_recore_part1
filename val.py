@@ -46,9 +46,9 @@ def train_evaluate_model(X_trn, X_tst, y_trn, y_tst, verbose=True):
         scoring=make_scorer(r2_score),
         alpha_per_target=True,
     )
-    model = TransformedTargetRegressor(model, func=np.log1p, inverse_func=np.expm1)
+    # model = TransformedTargetRegressor(model, func=np.log1p, inverse_func=np.expm1)
 
-    model.fit(X_trn, y_trn.clip(lower=0))
+    model.fit(X_trn, y_trn)
 
     preds_trn = pd.DataFrame(model.predict(X_trn), columns=target_columns)
     preds_tst = pd.DataFrame(model.predict(X_tst), columns=target_columns)
