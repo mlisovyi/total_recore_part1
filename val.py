@@ -41,7 +41,7 @@ def train_evaluate_model(X_trn, X_tst, y_trn, y_tst, verbose=True):
         print(f"TRN: {len(X_trn)}, TST: {len(X_tst)}")
 
     # the example model
-    model = RidgeCV(
+    model = CustomRidgeCV(
         alphas=np.logspace(-5, 5, 50),
         scoring=make_scorer(r2_score),
         alpha_per_target=True,
