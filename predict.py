@@ -10,7 +10,7 @@ from preprocess import preprocess, target_columns
 from train import model_fn
 
 # needed to load the model from pickle
-from train import CustomRidgeCV
+from mdl import CustomRidgeCV
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
