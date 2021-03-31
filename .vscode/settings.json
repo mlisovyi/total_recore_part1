@@ -2,10 +2,12 @@
     "python.envFile": "${workspaceFolder}/.env",
     "terminal.integrated.env.linux": {
         "SM_MODEL_DIR": "${workspaceFolder}/model",
-        "SM_CHANNEL_TRAINING": "${workspaceFolder}/data/public"
+        "SM_CHANNEL_TRAINING": "${workspaceFolder}/data/public",
+        "SM_OUTPUT_DIR": "${workspaceFolder}/model"
     },
     "terminal.integrated.env.windows": {
         "SM_MODEL_DIR": "${workspaceFolder}\\model",
-        "SM_CHANNEL_TRAINING": "${workspaceFolder}\\data\\public"
+        "SM_CHANNEL_TRAINING": "${workspaceFolder}\\data\\public",
+        "SM_OUTPUT_DIR": "${workspaceFolder}\\model"
     },
 }
