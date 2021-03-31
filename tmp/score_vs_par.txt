@@ -32,3 +32,7 @@ Performance in CV: 0.666 +- 0.036
 
 No SiteID, No Depth
 Performance in CV: 0.679 +- 0.034
+
+---------------------------------
+
+i_min = 0 n = 7     0.690 +- 0.032
