@@ -14,7 +14,7 @@ def scoring_fn(y, y_pred, individual_scores=False):
 
     The score is determined by calculating the r2 score for each target columns, and then taking an average of r2 scores.
     """
-    logger.info("scoring_fn")
+    # logger.info("scoring_fn")
     r2_scores = np.zeros(0)
     weight_array = np.array(
         [
@@ -168,4 +168,3 @@ if __name__ == "__main__":
     # write to the output location
     with open(args.output, "w") as f:
         f.write(str(score))
-
