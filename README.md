@@ -34,24 +34,35 @@ so you are adviced to do the same.
 
 ## Short summary
 
-- 
+- each spectrum is normalised to have the same maximal value in a certain channel range (`[0:-300]`)
+that was optimised to give the best score in local cross validation;
+  - this allows to make spectra more similar;
+- the spectra were aggregated using the sum within a window of 7 channels (also optimised)
+  - this allows to reduce the number of features in modelling without compromising on model performance;
+- Ridge linear regression was used for modelling;
+  - the regularisation strength is optimised in CV for each of the targets separately (exists in sklearn 0.24+);
+  - other model types were much slower and seemed to be not much better for such multi-target modelling;
+- the predictions are cliped at the lower boundary of 0, as the model often generates negative values
+that do not appear in the actual data;
+  - this allows to improve the model performance and make more meaningful predictions;
+  - this is implemented using a custom derived class in [mdl.py](mdl.py).
 
-# Challenge Template
+## Challenge Template
 
 This project is intended to be used with the Unearthed CLI tool and is built in such a way that the Unearthed training and scoring pipelines will function.
 
-## Requirements
+### Requirements
 
 This challenge is targetting the AWS SageMaker Scikit Learn Framework. Submissions must be compatible with this framework.
 Details of this framework is available at https://sagemaker.readthedocs.io/en/stable/frameworks/sklearn/using_sklearn.html
 
-## Submission Pipeline
+### Submission Pipeline
 
 The submission pipeline makes use of AWS SageMaker which runs within the AWS SageMaker Scikit Learn Framework container. The local Docker based simulation environment makes use of the same AWS SageMaker container, however the generation of predictions is slightly different.
 
 The following steps are performed in the online submission pipeline:
 
-### Step 1 - Model Training
+#### Step 1 - Model Training
 
 The first step is an AWS SageMaker Training job.
 
@@ -63,7 +74,7 @@ Whilst it is possible to perform hyperparameter tuning within `train.py` it is r
 
 Finally, the `train.py` must save the model to a binary file, and define a `model_fn` function that can read the binary file at a later point. This template demonstrates this using Pickle. Extensions to Pickle that save state or otherwise manipulate the training, prediction, and scoring environments are not supported, as they are ultimately not available in the industry partner's environment.
 
-### Step 2 - Preprocess
+#### Step 2 - Preprocess
 
 Once a model has been produced from the Training job, the pipeline simulates the industry partner's production environment in two parallel pipelines, "public" and "private".
 
@@ -73,7 +84,7 @@ The first step in both the public and private pipeline is a SageMaker Processing
 
 The Processing job has the full public data file mapped into the for the public pipeline, however only has the input variables available for the private pipeline. Trying to perform processing on the target variables in the private pipeline may cause the submission to fail.
 
-### Step 3 - Predictions
+#### Step 3 - Predictions
 
 Once preprocessing steps have been applied to the public and private datasets, the pipeline simulates a prediction. To do this it runs a SageMaker Batch Transform job. In this step SageMaker deploys a standarized SageMaker container that contains model serving code. The Batch Transform job then orchestrates sending the results of the previous preprocessing step via a HTTP POST to a web endpoint hosted by the model serving container.
 
@@ -83,7 +94,7 @@ The `model_fn` function is used to load the trained model into the container. Th
 
 The `input_fn` function is called when the Batch Transform job makes the HTTP call to the model serving container. The Batch Transform job sends the result of the preprocess step as a CSV file to the model serving container's web endpoint, which in turn passes it to this function. The output of this function must match the inputs expected by the previously trained model.
 
-### Step 4 - Scoring
+#### Step 4 - Scoring
 
 Once the prediction steps have been completed, the pipeline generates a score for the predictions made by the trained model. The pipeline does this by running a SageMaker Processing job that calls the `score` function in the `score.py` module. `score.py` is provided in the template, however it is not uploaded as part of a submission, and the latest version from the challenge template is always used.
 
