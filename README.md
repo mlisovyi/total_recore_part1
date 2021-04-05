@@ -8,9 +8,11 @@ Required packages are listed in [requirements.txt](requirements.txt).
 The solution is based on the [challenge template](#challenge-template) and consists of separate
 [preprocessing](preprocess.py), [training](train.py), [prediction](predict.py) and [scoring](score.py) steps.
 All steps can be run independently and only the preprocessing and training steps are submitted to the platform.
+Additionally, there are [exploratory data analysis](eda.py) and [model validation](val.py) scripts provided.
+
 Each submission is done as a container with the code that is automatically built and submitted by the
 [unearthed CLI tool](https://unearthed.solutions/u/docs/getting-started).
-The contained is in turn submissted into a scoring pipeline that:
+The container is in turn submitted into a scoring pipeline  on AWS that:
 
 - runs preprocessing+training on the public dataset, stores the model;
 - runs preprocessing on the public and private leaderboard datasets that participants do not have access to;
@@ -19,8 +21,20 @@ The contained is in turn submissted into a scoring pipeline that:
 
 The setup of the competition is really nice, as it allows to build real-life like pipeline instead of a hacky irreproducable notebook.
 
+## Installation
+
+1. Sign up to the [competionion](https://unearthed.solutions/u/competitions/100/description)
+2. Create locally a virtual environment based on python 3.7 (the version mentioned on the unearther webpage at the moment of the competition).
+3. Install the required packages from `requirements.txt` as well as the [unearthed CLI tool](https://unearthed.solutions/u/docs/getting-started).
+I have used `unearthed-cli 0.1.3`.
+4. Install docker and any further dependencies listed on the Unearthed getting-started web page.
+5. The solution has been developed using VSCode and there is a basic environmental setup provided to get thing going,
+so you are adviced to do the same.
+6. Download the data from the challenge webpage and put it into `data/public/public.csv.gz`.
+
 ## Short summary
 
+- 
 
 # Challenge Template
 
