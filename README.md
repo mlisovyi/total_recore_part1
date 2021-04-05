@@ -1,3 +1,12 @@
+# Solution to the Total Re-Core Part 1 challenge
+
+The [Total Re-Core Part 1](https://unearthed.solutions/u/competitions/100/) challenge aimed at developing a data-driven method to extract
+mineral contamination based on Fourrier Transform InfraRed (FTIR) spectra.
+
+Required packages are listed in [requirements.txt](requirements.txt).
+
+The solution is based on the [challenge template](#challenge-template)
+
 # Challenge Template
 
 This project is intended to be used with the Unearthed CLI tool and is built in such a way that the Unearthed training and scoring pipelines will function.
