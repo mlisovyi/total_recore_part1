@@ -1,4 +1,4 @@
-# Solution to the Total Re-Core Part 1 challenge
+# RandomNumbers solution to the Total Re-Core Part 1 challenge
 
 The [Total Re-Core Part 1](https://unearthed.solutions/u/competitions/100/) challenge aimed at developing a data-driven method to extract
 mineral contamination based on Fourrier Transform InfraRed (FTIR) spectra.
