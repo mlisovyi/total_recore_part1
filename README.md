@@ -5,7 +5,22 @@ mineral contamination based on Fourrier Transform InfraRed (FTIR) spectra.
 
 Required packages are listed in [requirements.txt](requirements.txt).
 
-The solution is based on the [challenge template](#challenge-template)
+The solution is based on the [challenge template](#challenge-template) and consists of separate
+[preprocessing](preprocess.py), [training](train.py), [prediction](predict.py) and [scoring](score.py) steps.
+All steps can be run independently and only the preprocessing and training steps are submitted to the platform.
+Each submission is done as a container with the code that is automatically built and submitted by the
+[unearthed CLI tool](https://unearthed.solutions/u/docs/getting-started).
+The contained is in turn submissted into a scoring pipeline that:
+
+- runs preprocessing+training on the public dataset, stores the model;
+- runs preprocessing on the public and private leaderboard datasets that participants do not have access to;
+- runs predictions on preprocessed public and private leaderboard datasets using the trained model;
+- runs scoring using the real target values.
+
+The setup of the competition is really nice, as it allows to build real-life like pipeline instead of a hacky irreproducable notebook.
+
+## Short summary
+
 
 # Challenge Template
 
