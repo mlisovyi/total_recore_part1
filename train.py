@@ -15,7 +15,7 @@ from sklearn.compose import TransformedTargetRegressor
 from sklearn.metrics import make_scorer, r2_score
 
 from preprocess import preprocess, target_columns
-from mdl import CustomRidgeCV, RidgeCV, EnsembleModel
+from mdl import CustomRidgeCV
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
